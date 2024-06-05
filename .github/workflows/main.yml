@@ -16,7 +16,8 @@ jobs:
       - name: Determine if code files changed
         id: changes
         run: |
-          if git diff --quiet HEAD~1 HEAD ./path/to/code/files; then
+          PARENT_COMMIT=$(git log --pretty=format:'%H' -n 1 HEAD^)
+          if git diff --quiet $PARENT_COMMIT HEAD ./path/to/code/files; then
             echo "no_changes=true" >> $GITHUB_ENV
           else
             echo "no_changes=false" >> $GITHUB_ENV
