@@ -1,0 +1,36 @@
+name: Deploy to live
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+      - name: Archive production artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: portfolio-artifact
+          path: /
+  deploy:
+    name: Deploy
+    needs: /
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@master
+      - name: Download the artifact
+        uses: actions/download-artifact@master
+        with:
+          name: portfolio-artifact
+          path: /
+      - name: Sync files to hosting
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: ${{ secrets.ftp_server }}
+          username: ${{ secrets.ftp_username }}
+          password: ${{ secrets.ftp_password }}
+          local-dir: /
