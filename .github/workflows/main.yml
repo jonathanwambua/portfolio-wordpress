@@ -13,19 +13,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Determine if code files changed
-        id: changes
-        run: |
-          PARENT_COMMIT=$(git rev-parse HEAD^)
-          if git diff --quiet $PARENT_COMMIT HEAD ./path/to/code/files; then
-            echo "no_changes=true" >> $GITHUB_ENV
-          else
-            echo "no_changes=false" >> $GITHUB_ENV
-          fi
-
       - name: Cache artifact
         id: cache-artifact
-        if: env.no_changes == 'true'
         uses: actions/cache@v3
         with:
           path: artifact
@@ -34,13 +23,13 @@ jobs:
             ${{ runner.os }}-artifact-
 
       - name: Prepare artifact
-        if: env.no_changes != 'true'
         run: |
           mkdir -p artifact
           rsync -av --exclude='artifact' --exclude='.git' ./ artifact/
+        if: steps.cache-artifact.outputs.cache-hit != 'true'
 
       - name: Archive production artifact
-        if: env.no_changes != 'true'
+        if: steps.cache-artifact.outputs.cache-hit != 'true'
         uses: actions/upload-artifact@v2
         with:
           name: portfolio-artifact
