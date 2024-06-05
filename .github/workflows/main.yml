@@ -43,7 +43,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Restore artifact from cache
+        uses: actions/cache@v3
+        with:
+          path: artifact
+          key: ${{ runner.os }}-artifact-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-artifact-
+
       - name: Download the artifact
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/download-artifact@v2
         with:
           name: portfolio-artifact
