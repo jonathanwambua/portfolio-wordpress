@@ -16,8 +16,12 @@ jobs:
       - name: Determine if code files changed
         id: changes
         run: |
-          if git diff --quiet HEAD^ HEAD ./path/to/code/files; then
-            echo "no_changes=true" >> $GITHUB_ENV
+          if [[ $(git rev-parse --verify HEAD^) ]]; then
+            if git diff --quiet HEAD^ HEAD ./path/to/code/files; then
+              echo "no_changes=true" >> $GITHUB_ENV
+            else
+              echo "no_changes=false" >> $GITHUB_ENV
+            fi
           else
             echo "no_changes=false" >> $GITHUB_ENV
           fi
